@@ -3,7 +3,7 @@ name: Build LaTeX Document
 on:
   push:
     branches:
-      - main  # Adjust the branch name as needed
+      - main  # Passe den Branch an
   pull_request:
 
 jobs:
@@ -11,16 +11,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository
+      # 1. Repository auschecken
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Run LaTeX compiler in Docker
-      - name: Compile LaTeX document
+      # 2. LaTeX-Datei mit pdflatex kompilieren (erster Lauf)
+      - name: Run pdflatex (1st pass)
         run: |
           docker run --rm -v "${{ github.workspace }}/Ausarbeitung:/workspace" swfcloud/latexcompiler Ausarbeitung.tex
 
-      # Optionally upload the compiled PDF as an artifact
+      # 3. Biber ausführen (für Literaturverzeichnis)
+      - name: Run biber
+        run: |
+          docker run --rm -v "${{ github.workspace }}/Ausarbeitung:/workspace" swfcloud/latexcompiler biber Ausarbeitung
+
+      # 4. LaTeX-Datei mit pdflatex erneut kompilieren (zweiter Lauf)
+      - name: Run pdflatex (2nd pass)
+        run: |
+          docker run --rm -v "${{ github.workspace }}/Ausarbeitung:/workspace" swfcloud/latexcompiler Ausarbeitung.tex
+
+      # 5. LaTeX-Datei mit pdflatex ein drittes Mal kompilieren (für Verzeichnisse)
+      - name: Run pdflatex (3rd pass)
+        run: |
+          docker run --rm -v "${{ github.workspace }}/Ausarbeitung:/workspace" swfcloud/latexcompiler Ausarbeitung.tex
+
+      # 6. PDF-Artefakt hochladen
       - name: Upload PDF artifact
         uses: actions/upload-artifact@v3
         with:
