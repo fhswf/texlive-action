@@ -1,9 +1,9 @@
-name: Build LaTeX Document
+name: Build and Commit PDF
 
 on:
   push:
     branches:
-      - main
+      - main  # Passe den Branch an
   pull_request:
 
 jobs:
@@ -11,11 +11,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repository
+      # 1. Repository auschecken
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. Run pdflatex (1st pass) and handle errors gracefully
+      # 2. Run pdflatex (1st pass)
       - name: Run pdflatex (1st pass)
         run: |
           docker run --rm -v "${{ github.workspace }}/Ausarbeitung:/workspace" swfcloud/latexcompiler Ausarbeitung.tex || echo "pdflatex completed with warnings"
@@ -35,9 +35,15 @@ jobs:
         run: |
           docker run --rm -v "${{ github.workspace }}/Ausarbeitung:/workspace" swfcloud/latexcompiler Ausarbeitung.tex || echo "pdflatex completed with warnings"
 
-      # 6. Upload PDF artifact
-      - name: Upload PDF artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: compiled-pdf
-          path: Ausarbeitung/Ausarbeitung.pdf
+      # 6. Commit and push the PDF to the repository
+      - name: Commit and Push PDF
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          cd Ausarbeitung
+          git add Ausarbeitung.pdf
+          git commit -m "Update compiled PDF"
+          git push
+        env:
+          # GitHub Actions Token for authentication
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
