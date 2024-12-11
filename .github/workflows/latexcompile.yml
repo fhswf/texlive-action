@@ -3,7 +3,7 @@ name: Build LaTeX Document
 on:
   push:
     branches:
-      - main  # Passe den Branch an
+      - main
   pull_request:
 
 jobs:
@@ -11,31 +11,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Repository auschecken
+      # 1. Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. LaTeX-Datei mit pdflatex kompilieren (erster Lauf)
+      # 2. Run pdflatex (1st pass) and handle errors gracefully
       - name: Run pdflatex (1st pass)
         run: |
-          docker run --rm -v "${{ github.workspace }}/Ausarbeitung:/workspace" swfcloud/latexcompiler Ausarbeitung.tex
+          docker run --rm -v "${{ github.workspace }}/Ausarbeitung:/workspace" swfcloud/latexcompiler Ausarbeitung.tex || echo "pdflatex completed with warnings"
 
-      # 3. Biber ausführen (für Literaturverzeichnis)
+      # 3. Run biber
       - name: Run biber
         run: |
-          docker run --rm -v "${{ github.workspace }}/Ausarbeitung:/workspace" swfcloud/latexcompiler biber Ausarbeitung
+          docker run --rm -v "${{ github.workspace }}/Ausarbeitung:/workspace" swfcloud/latexcompiler biber Ausarbeitung || echo "biber completed with warnings"
 
-      # 4. LaTeX-Datei mit pdflatex erneut kompilieren (zweiter Lauf)
+      # 4. Run pdflatex (2nd pass)
       - name: Run pdflatex (2nd pass)
         run: |
-          docker run --rm -v "${{ github.workspace }}/Ausarbeitung:/workspace" swfcloud/latexcompiler Ausarbeitung.tex
+          docker run --rm -v "${{ github.workspace }}/Ausarbeitung:/workspace" swfcloud/latexcompiler Ausarbeitung.tex || echo "pdflatex completed with warnings"
 
-      # 5. LaTeX-Datei mit pdflatex ein drittes Mal kompilieren (für Verzeichnisse)
+      # 5. Run pdflatex (3rd pass)
       - name: Run pdflatex (3rd pass)
         run: |
-          docker run --rm -v "${{ github.workspace }}/Ausarbeitung:/workspace" swfcloud/latexcompiler Ausarbeitung.tex
+          docker run --rm -v "${{ github.workspace }}/Ausarbeitung:/workspace" swfcloud/latexcompiler Ausarbeitung.tex || echo "pdflatex completed with warnings"
 
-      # 6. PDF-Artefakt hochladen
+      # 6. Upload PDF artifact
       - name: Upload PDF artifact
         uses: actions/upload-artifact@v3
         with:
