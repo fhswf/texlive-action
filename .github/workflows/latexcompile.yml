@@ -1,0 +1,28 @@
+name: Build LaTeX Document
+
+on:
+  push:
+    branches:
+      - main  # Adjust the branch name as needed
+  pull_request:
+
+jobs:
+  build-pdf:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Run LaTeX compiler in Docker
+      - name: Compile LaTeX document
+        run: |
+          docker run --rm -v "${{ github.workspace }}/Ausarbeitung:/workspace" swfcloud/latexcompiler Ausarbeitung.tex
+
+      # Optionally upload the compiled PDF as an artifact
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: compiled-pdf
+          path: Ausarbeitung/Ausarbeitung.pdf
