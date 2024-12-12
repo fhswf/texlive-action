@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     biber \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+VOLUME /workspace
 WORKDIR /workspace
 ENTRYPOINT ["pdflatex", "-interaction=nonstopmode"]
 CMD ["main.tex"]
